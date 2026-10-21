@@ -232,7 +232,7 @@
       patterns: [/(about|who are you|what is operis|history|background|why trust|credibility|values)/i],
       response: () => `
         <p>✨ <strong>About Operis Management Solutions:</strong></p>
-        <p>Operis is an operational management and consulting firm designed to empower businesses through operational excellence. We bridge high-standards facility maintenance, skilled manpower deployment, strategic hospitality revenue guidance, and practical career development.</p>
+        <p>Operis is an operational management and consulting firm designed to empower businesses through business excellence. We bridge high-standards facility maintenance, skilled manpower deployment, strategic hospitality revenue guidance, and practical career development.</p>
         <div class="bot-action-links">
           <a class="bot-action-pill" onclick="window.operisBot.jumpTo('#about')">Read About Us Section ↓</a>
           <a class="bot-action-pill" onclick="window.operisBot.jumpTo('#why-trust')">Why Trust Operis ↓</a>
