@@ -1,541 +1,500 @@
-/**
- * ====================================================================
- * OPERIS AI ASSISTANT (operis-bot.js)
- * Intelligent interactive assistant powered by the Operis website knowledge base.
- * ====================================================================
- */
+/* ==========================================================
+   OPERIS AI ASSISTANT — STYLES
+   ========================================================== */
 
-(function () {
-  'use strict';
+:root {
+  --bot-accent: #38b27d;
+  --bot-accent-hover: #4ade9f;
+  --bot-dark: #10110e;
+  --bot-surface: #181915;
+  --bot-card: #20211c;
+  --bot-border: #2c2e27;
+  --bot-text: #f0f0ea;
+  --bot-muted: #96968f;
+  --bot-shadow: 0 20px 48px rgba(0, 0, 0, 0.55);
+}
 
-  // --- Configuration ---
-  const BOT_CONFIG = {
-    botName: 'Operis AI Assistant',
-    avatarImg: 'logo-circle.png',
-    companyName: 'Operis Management Solutions',
-    phoneOffice: '04842000204',
-    phoneMobile: '+91 8891501203',
-    phoneMobileRaw: '8891501203',
-    whatsapp: '+91 8891501203',
-    whatsappRaw: '918891501203',
-    email: 'info.operis@gmail.com',
-    hours: 'Mon–Sat: 9:30 AM – 5:30 PM',
-    locationText: 'Door No. 2/226E, 1st Floor Thomas Arcade, NH 66, Near Kerala Gramin Bank, Varapuzha, Kochi, Kerala 683517',
-    coords: '10°05\'19.6"N 76°16\'01.9"E',
-    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=10.088778,76.267194'
-  };
+/* Floating Launcher Button */
+.operis-bot-launcher {
+  position: fixed;
+  bottom: 96px;
+  right: 28px;
+  left: auto;
+  z-index: 9980;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bot-dark);
+  color: var(--bot-text);
+  border: 1px solid var(--bot-border);
+  padding: 8px 16px 8px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+  transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s, border-color .25s;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  user-select: none;
+}
 
-  // --- Website Knowledge Base & Response Handlers ---
-  const KNOWLEDGE_RESPONSES = [
-    {
-      id: 'greeting',
-      patterns: [/^(hi|hello|hey|hola|namaste|good\s*(morning|afternoon|evening)|halo|start)/i],
-      response: () => `
-        <p>Hello! 👋 Welcome to <strong>${BOT_CONFIG.companyName}</strong>.</p>
-        <p>I am your AI assistant. I can answer questions about our service portfolios, office location, job opportunities, or help you connect with our team.</p>
-        <p>What would you like to know today?</p>
-      `,
-      chips: ['What services do you offer?', 'Where is your office?', 'Contact numbers', 'How do I apply for a job?']
-    },
-    {
-      id: 'services_overview',
-      patterns: [/(services|what do you do|what do you offer|portfolio|capabilities|solutions|business areas)/i],
-      response: () => `
-        <p><strong>Operis Management Solutions</strong> delivers operational excellence across 4 core portfolios:</p>
-        <ul>
-          <li><strong>Integrated Facility Management</strong> — Janitorial, property maintenance, security, landscaping & MEP support.</li>
-          <li><strong>HR & Workforce Management</strong> — Recruitment, talent acquisition, manpower deployment & payroll compliance.</li>
-          <li><strong>Business Management</strong> — Hotel classification, revenue consulting, OTA management & brand growth.</li>
-          <li><strong>Skill Development & Career Training</strong> — Practical, industry-oriented professional courses & institutional programs.</li>
-        </ul>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" onclick="window.operisBot.jumpTo('#services')">View Services Section ↓</a>
-          <a class="bot-action-pill" onclick="window.operisBot.sendChip('Facility Management')">Facility Scope</a>
-          <a class="bot-action-pill" onclick="window.operisBot.sendChip('HR & Workforce')">HR Scope</a>
-          <a class="bot-action-pill" onclick="window.operisBot.sendChip('Hotel Classification')">Hotel Consulting</a>
-        </div>
-      `,
-      chips: ['Facility Management', 'HR & Workforce', 'Hotel Classification', 'Skill Development']
-    },
-    {
-      id: 'facility_management',
-      patterns: [/(facility|housekeeping|janitorial|cleaning|maintenance|pest control|fumigation|security|valet|pantry|cafeteria|landscaping|gardening|stores|distribution|home care)/i],
-      response: () => `
-        <p>🏢 <strong>Integrated Facility Management Portfolio:</strong></p>
-        <ul>
-          <li>Housekeeping & Janitorial Services</li>
-          <li>Facility Scheduled Services & Staff Management</li>
-          <li>Property Maintenance & Technical MEP Support</li>
-          <li>Pantry & Cafeteria Management</li>
-          <li>Garden & Landscaping Maintenance</li>
-          <li>Help Desk & Service Counter Operations</li>
-          <li>Security & Valet Service</li>
-          <li>Pest Control & Fumigation Services</li>
-          <li>Home Care & Caretaker Services</li>
-          <li>Stores & Distribution Management</li>
-        </ul>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" onclick="window.operisBot.jumpTo('#contact')">Request Facility Proposal ↓</a>
-          <a class="bot-action-pill" href="tel:${BOT_CONFIG.phoneOffice}">Call Office Desk: ${BOT_CONFIG.phoneOffice}</a>
-        </div>
-      `,
-      chips: ['Contact numbers', 'Where is your office?', 'HR Services']
-    },
-    {
-      id: 'hr_management',
-      patterns: [/(human resource|hr|workforce|recruitment|talent acquisition|manpower|deployment|staffing|payroll|attendance|compliance|labor relations|dispute)/i],
-      response: () => `
-        <p>👥 <strong>Human Resource & Workforce Management Portfolio:</strong></p>
-        <ul>
-          <li>Recruitment & Talent Acquisition</li>
-          <li>Manpower Deployment Services</li>
-          <li>Payroll & Attendance Management</li>
-          <li>Employee Documentation & Onboarding</li>
-          <li>Statutory Compliance Management</li>
-          <li>Training & Performance Management</li>
-          <li>Labor Relations & Dispute Resolutions</li>
-        </ul>
-        <p>We supply verified, trained personnel and handle full compliance lifecycle for enterprises.</p>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" onclick="window.operisBot.jumpTo('#contact')">Hire Manpower ↓</a>
-          <a class="bot-action-pill" href="mailto:${BOT_CONFIG.email}">Email HR Desk</a>
-        </div>
-      `,
-      chips: ['Job Applications', 'Facility Management', 'Contact numbers']
-    },
-    {
-      id: 'business_consulting',
-      patterns: [/(hotel classification|classification consultancy|stars|revenue management|ota|central reservation|f&b|restaurant consulting|tourism|travel|banquet|events|brand development|digital marketing)/i],
-      response: () => `
-        <p>📈 <strong>Business Management & Hospitality Consulting Portfolio:</strong></p>
-        <ul>
-          <li><strong>Hotel Classification Consultancy</strong> (Star classification audit & preparation)</li>
-          <li>Revenue Management & Profitability Consulting</li>
-          <li>OTA & Central Reservation Management</li>
-          <li>Brand Development & Digital Marketing Solutions</li>
-          <li>F&B Revenue & Restaurant Consulting</li>
-          <li>Tourism & Travel Business Solutions</li>
-          <li>Hospitality Business Process Consulting</li>
-          <li>Events & Banquet Business Development</li>
-          <li>Customer Experience & Reputation Consulting</li>
-          <li>Referral Network & Partnership Facilitation</li>
-        </ul>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" onclick="window.operisBot.jumpTo('#contact')">Book Consultation ↓</a>
-          <a class="bot-action-pill" href="tel:${BOT_CONFIG.phoneOffice}">Call ${BOT_CONFIG.phoneOffice}</a>
-        </div>
-      `,
-      chips: ['Skill Development', 'Contact Us', 'Our Location']
-    },
-    {
-      id: 'skills_training',
-      patterns: [/(skill|training|course|institution|career skill|college|school|internship|employability|practical training|mentorship|student|ethics)/i],
-      response: () => `
-        <p>🎓 <strong>Skill Development & Career Training Portfolio:</strong></p>
-        <ul>
-          <li><strong>Professional & Industry-Specific Courses:</strong> Human Resources & Administration, Accounting & Finance, Hospitality & Hotel Operations, Customer Service, Sales & Marketing.</li>
-          <li>Digital & Workplace Skills Training</li>
-          <li>Soft Skills & Professional Development</li>
-          <li>Job Readiness & Interview Preparation</li>
-          <li>Internship & Career Development Programs</li>
-          <li>School & College Employability Sessions</li>
-          <li>Corporate Training & Employee Development</li>
-          <li>Industry-Oriented Practical Training & Career Guidance</li>
-        </ul>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" onclick="window.operisBot.jumpTo('#careers')">View Career Institution ↓</a>
-          <a class="bot-action-pill" href="mailto:${BOT_CONFIG.email}">Inquire Courses</a>
-        </div>
-      `,
-      chips: ['How do I apply for a job?', 'Contact numbers', 'Facility Scope']
-    },
-    {
-      id: 'contact_details',
-      patterns: [/(contact|phone|mobile|call|landline|number|reach|telephone|hotline|desk|dial)/i],
-      response: () => `
-        <p>📞 <strong>Official Contact Points for Operis:</strong></p>
-        <ul>
-          <li><strong>Office Desk (Landline):</strong> <a href="tel:${BOT_CONFIG.phoneOffice}">${BOT_CONFIG.phoneOffice}</a></li>
-          <li><strong>Mobile / Direct Call:</strong> <a href="tel:${BOT_CONFIG.phoneMobileRaw}">${BOT_CONFIG.phoneMobile}</a></li>
-          <li><strong>WhatsApp Chat:</strong> <a href="https://wa.me/${BOT_CONFIG.whatsappRaw}" target="_blank" rel="noopener">Chat on WhatsApp ↗</a></li>
-          <li><strong>Email Enquiries:</strong> <a href="mailto:${BOT_CONFIG.email}">${BOT_CONFIG.email}</a></li>
-          <li><strong>Operating Hours:</strong> ${BOT_CONFIG.hours}</li>
-        </ul>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" href="tel:${BOT_CONFIG.phoneOffice}">Call Office Desk</a>
-          <a class="bot-action-pill" href="https://wa.me/${BOT_CONFIG.whatsappRaw}" target="_blank">Open WhatsApp</a>
-        </div>
-      `,
-      chips: ['Where is your office?', 'Email Address', 'What services do you offer?']
-    },
-    {
-      id: 'email',
-      patterns: [/(email|mail|inbox|send email|write to you)/i],
-      response: () => `
-        <p>✉️ Our primary email address is:</p>
-        <p><strong><a href="mailto:${BOT_CONFIG.email}">${BOT_CONFIG.email}</a></strong></p>
-        <p>Feel free to send enquiry letters, project requests, service requirements, or job resumes directly to this inbox.</p>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" href="mailto:${BOT_CONFIG.email}">Send Email Now ↗</a>
-        </div>
-      `,
-      chips: ['Contact numbers', 'Where is your office?', 'Submit Enquiry Form']
-    },
-    {
-      id: 'location_address',
-      patterns: [/(location|address|where|office|headquarters|hq|directions|map|gps|coordinates|varapuzha|kochi|ernakulam|kerala)/i],
-      response: () => `
-        <p>📍 <strong>Headquarters & Office Location:</strong></p>
-        <p>${BOT_CONFIG.locationText}</p>
-        <p><strong>GPS Coordinates:</strong> <code>${BOT_CONFIG.coords}</code></p>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" href="${BOT_CONFIG.mapsUrl}" target="_blank" rel="noopener">Open in Google Maps ↗</a>
-          <a class="bot-action-pill" onclick="window.operisBot.jumpTo('#contact')">View Map on Page ↓</a>
-        </div>
-      `,
-      chips: ['Contact numbers', 'Working Hours', 'What services do you offer?']
-    },
-    {
-      id: 'operating_hours',
-      patterns: [/(hours|timing|timings|open|schedule|time|days|sunday|saturday)/i],
-      response: () => `
-        <p>⏰ <strong>Office Operating Hours:</strong></p>
-        <p><strong>Monday to Saturday:</strong> 9:30 AM – 5:30 PM<br>
-        <strong>Sunday:</strong> Closed</p>
-        <p>You can also leave us a message anytime via email at <a href="mailto:${BOT_CONFIG.email}">${BOT_CONFIG.email}</a> or WhatsApp.</p>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" href="tel:${BOT_CONFIG.phoneOffice}">Call ${BOT_CONFIG.phoneOffice}</a>
-        </div>
-      `,
-      chips: ['Contact numbers', 'Where is your office?']
-    },
-    {
-      id: 'careers_jobs',
-      patterns: [/(career|job|apply|hiring|vacancy|work with|recruitment for job|resume|cv|application|interview)/i],
-      response: () => `
-        <p>💼 <strong>Join Operis / Job Applications:</strong></p>
-        <p>We are consistently seeking passionate professionals across facility operations, housekeeping, hospitality, technical maintenance, and corporate staffing.</p>
-        <p>To apply:</p>
-        <ul>
-          <li>Email your resume/CV to: <strong><a href="mailto:${BOT_CONFIG.email}">${BOT_CONFIG.email}</a></strong> with subject line <em>"Job Application - [Your Field]"</em>.</li>
-          <li>Or call our recruitment desk at <strong><a href="tel:${BOT_CONFIG.phoneMobileRaw}">${BOT_CONFIG.phoneMobile}</a></strong>.</li>
-        </ul>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" href="mailto:${BOT_CONFIG.email}?subject=Job%20Application">Email Resume ↗</a>
-          <a class="bot-action-pill" href="tel:${BOT_CONFIG.phoneMobileRaw}">Call HR Mobile</a>
-        </div>
-      `,
-      chips: ['Skill Development Training', 'Contact numbers', 'About Operis']
-    },
-    {
-      id: 'about_company',
-      patterns: [/(about|who are you|what is operis|history|background|why trust|credibility|values)/i],
-      response: () => `
-        <p>✨ <strong>About Operis Management Solutions:</strong></p>
-        <p>Operis is an operational management and consulting firm designed to empower businesses through business excellence. We bridge high-standards facility maintenance, skilled manpower deployment, strategic hospitality revenue guidance, and practical career development.</p>
-        <div class="bot-action-links">
-          <a class="bot-action-pill" onclick="window.operisBot.jumpTo('#about')">Read About Us Section ↓</a>
-          <a class="bot-action-pill" onclick="window.operisBot.jumpTo('#why-trust')">Why Trust Operis ↓</a>
-        </div>
-      `,
-      chips: ['What services do you offer?', 'Where is your office?', 'Contact numbers']
-    }
-  ];
+.operis-bot-launcher:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: var(--bot-accent);
+  box-shadow: 0 14px 34px rgba(56, 178, 125, 0.22);
+}
 
-  // Fallback response for unhandled questions
-  function getFallbackResponse(query) {
-    return `
-      <p>I would be delighted to assist you with that! While I am continuously expanding my knowledge base, here is what I can quickly help you with:</p>
-      <ul>
-        <li>Full details on our <strong>4 Service Portfolios</strong></li>
-        <li>Office location & directions in <strong>Varapuzha, Kochi</strong></li>
-        <li>Connecting directly with our team by <strong>Phone, WhatsApp, or Email</strong></li>
-        <li>How to <strong>apply for jobs or career courses</strong></li>
-      </ul>
-      <p>Would you like to connect directly with an Operis consultant?</p>
-      <div class="bot-action-links">
-        <a class="bot-action-pill" href="tel:${BOT_CONFIG.phoneOffice}">Call ${BOT_CONFIG.phoneOffice}</a>
-        <a class="bot-action-pill" href="https://wa.me/${BOT_CONFIG.whatsappRaw}" target="_blank">Chat on WhatsApp</a>
-        <a class="bot-action-pill" href="mailto:${BOT_CONFIG.email}">Send Email</a>
-      </div>
-    `;
+.operis-bot-launcher .launcher-avatar {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #1c1d18;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  border: 1px solid rgba(56, 178, 125, 0.4);
+}
+
+.operis-bot-launcher .launcher-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.operis-bot-launcher .launcher-online {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background: var(--bot-accent);
+  border: 2px solid var(--bot-dark);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--bot-accent);
+}
+
+.operis-bot-launcher .launcher-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.operis-bot-launcher .launcher-title {
+  font-weight: 600;
+  color: #fff;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.operis-bot-launcher .launcher-sub {
+  font-size: 10px;
+  color: var(--bot-accent);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.operis-bot-launcher .sparkle-icon {
+  width: 13px;
+  height: 13px;
+  fill: var(--bot-accent);
+  animation: sparkPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes sparkPulse {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.2) rotate(15deg); opacity: .7; }
+}
+
+/* Chat Container Modal */
+.operis-bot-panel {
+  position: fixed;
+  bottom: 96px;
+  right: 28px;
+  left: auto;
+  width: 390px;
+  max-width: calc(100vw - 36px);
+  height: 580px;
+  max-height: calc(100vh - 120px);
+  background: var(--bot-surface);
+  border: 1px solid var(--bot-border);
+  border-radius: 20px;
+  box-shadow: var(--bot-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 9990;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(18px) scale(0.97);
+  transform-origin: bottom right;
+  transition: opacity .25s ease, transform .25s cubic-bezier(.2,.8,.2,1), visibility .25s;
+  font-family: inherit;
+}
+
+.operis-bot-panel.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+/* Chat Header */
+.operis-bot-header {
+  padding: 16px 18px;
+  background: var(--bot-dark);
+  border-bottom: 1px solid var(--bot-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.operis-bot-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bot-header-avatar {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(56, 178, 125, 0.4);
+}
+
+.bot-header-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bot-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.bot-header-status {
+  font-size: 11px;
+  color: var(--bot-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.bot-header-status .live-pip {
+  width: 7px;
+  height: 7px;
+  background: var(--bot-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--bot-accent);
+}
+
+.operis-bot-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bot-icon-btn {
+  background: transparent;
+  border: 0;
+  color: var(--bot-muted);
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+  font-size: 16px;
+}
+
+.bot-icon-btn:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+/* Chat Messages View */
+.operis-bot-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-behavior: smooth;
+}
+
+.operis-bot-messages::-webkit-scrollbar {
+  width: 5px;
+}
+.operis-bot-messages::-webkit-scrollbar-thumb {
+  background: #2f3128;
+  border-radius: 4px;
+}
+
+/* Chat Message Bubbles */
+.bot-msg {
+  display: flex;
+  gap: 10px;
+  max-width: 90%;
+  animation: botFadeIn .25s ease-out;
+}
+
+@keyframes botFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bot-msg.bot {
+  align-self: flex-start;
+}
+
+.bot-msg.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.bot-msg-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.bot-msg-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bot-bubble {
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--bot-text);
+  word-break: break-word;
+}
+
+.bot-msg.bot .bot-bubble {
+  background: var(--bot-card);
+  border: 1px solid var(--bot-border);
+  border-top-left-radius: 4px;
+}
+
+.bot-msg.user .bot-bubble {
+  background: var(--bot-accent);
+  color: #0b0c0a;
+  font-weight: 500;
+  border-top-right-radius: 4px;
+}
+
+.bot-bubble strong {
+  color: #fff;
+  font-weight: 600;
+}
+.bot-msg.user .bot-bubble strong {
+  color: #000;
+}
+
+.bot-bubble p {
+  margin: 0 0 8px 0;
+}
+.bot-bubble p:last-child {
+  margin-bottom: 0;
+}
+
+.bot-bubble ul {
+  margin: 6px 0 6px 18px;
+  padding: 0;
+}
+.bot-bubble li {
+  margin-bottom: 4px;
+}
+
+.bot-bubble a {
+  color: var(--bot-accent);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.bot-bubble a:hover {
+  color: var(--bot-accent-hover);
+}
+
+.bot-msg.user .bot-bubble a {
+  color: #000;
+}
+
+/* Jump Section Buttons in Chat */
+.bot-action-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.bot-action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: rgba(56, 178, 125, 0.12);
+  color: var(--bot-accent);
+  border: 1px solid rgba(56, 178, 125, 0.3);
+  text-decoration: none!important;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.bot-action-pill:hover {
+  background: var(--bot-accent);
+  color: #10110e!important;
+  border-color: var(--bot-accent);
+}
+
+/* Prompt Chips Suggestions */
+.bot-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.bot-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid #2f302a;
+  color: #d1d0c8;
+  padding: 6px 11px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: left;
+}
+
+.bot-chip:hover {
+  border-color: var(--bot-accent);
+  color: #fff;
+  background: rgba(56, 178, 125, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Typing Indicator Animation */
+.bot-typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+}
+
+.bot-typing-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--bot-muted);
+  border-radius: 50%;
+  animation: botBounce 1.4s infinite ease-in-out;
+}
+.bot-typing-dot:nth-child(2) { animation-delay: .2s; }
+.bot-typing-dot:nth-child(3) { animation-delay: .4s; }
+
+@keyframes botBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: .4; }
+  40% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* Input Area */
+.operis-bot-input-area {
+  padding: 12px 14px;
+  background: var(--bot-dark);
+  border-top: 1px solid var(--bot-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.operis-bot-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--bot-border);
+  border-radius: 24px;
+  padding: 10px 16px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s;
+}
+
+.operis-bot-input:focus {
+  border-color: var(--bot-accent);
+}
+
+.operis-bot-input::placeholder {
+  color: #6d6e66;
+}
+
+.operis-bot-send {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bot-accent);
+  border: 0;
+  color: #10110e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .2s, transform .2s;
+}
+
+.operis-bot-send:hover {
+  background: var(--bot-accent-hover);
+  transform: scale(1.05);
+}
+
+.operis-bot-send svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+  margin-left: 2px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  .operis-bot-launcher {
+    bottom: 80px;
+    right: 20px;
+    left: auto;
+    padding: 6px 12px 6px 8px;
   }
-
-  // --- Bot UI Controller ---
-  class OperisBotWidget {
-    constructor() {
-      this.isOpen = false;
-      this.isTyping = false;
-      this.messages = [];
-      this.init();
-    }
-
-    init() {
-      this.injectDOM();
-      this.bindEvents();
-      this.addInitialGreeting();
-    }
-
-    injectDOM() {
-      if (document.getElementById('operisBotLauncher')) return;
-
-      // 1. Launcher button
-      const launcher = document.createElement('div');
-      launcher.id = 'operisBotLauncher';
-      launcher.className = 'operis-bot-launcher';
-      launcher.setAttribute('aria-label', 'Open Operis AI Assistant');
-      launcher.innerHTML = `
-        <div class="launcher-avatar">
-          <img src="${BOT_CONFIG.avatarImg}" alt="Operis AI Assistant">
-          <span class="launcher-online"></span>
-        </div>
-        <div class="launcher-text">
-          <div class="launcher-title">
-            <span>Operis AI</span>
-            <svg class="sparkle-icon" viewBox="0 0 24 24"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/></svg>
-          </div>
-          <div class="launcher-sub">Ask Anything</div>
-        </div>
-      `;
-      document.body.appendChild(launcher);
-
-      // 2. Chat Panel
-      const panel = document.createElement('div');
-      panel.id = 'operisBotPanel';
-      panel.className = 'operis-bot-panel';
-      panel.setAttribute('role', 'dialog');
-      panel.setAttribute('aria-modal', 'true');
-      panel.setAttribute('aria-label', 'Operis AI Chat');
-      panel.innerHTML = `
-        <div class="operis-bot-header">
-          <div class="operis-bot-header-left">
-            <div class="bot-header-avatar">
-              <img src="${BOT_CONFIG.avatarImg}" alt="Operis Logo">
-            </div>
-            <div>
-              <div class="bot-header-title">${BOT_CONFIG.botName}</div>
-              <div class="bot-header-status">
-                <span class="live-pip"></span>
-                <span>Online • Website Guide</span>
-              </div>
-            </div>
-          </div>
-          <div class="operis-bot-header-actions">
-            <button class="bot-icon-btn" id="operisBotClear" title="Clear chat history" aria-label="Clear chat">↻</button>
-            <button class="bot-icon-btn" id="operisBotClose" title="Close assistant" aria-label="Close assistant">✕</button>
-          </div>
-        </div>
-
-        <div class="operis-bot-messages" id="operisBotMessages"></div>
-
-        <form class="operis-bot-input-area" id="operisBotForm">
-          <input 
-            type="text" 
-            id="operisBotInput" 
-            class="operis-bot-input" 
-            placeholder="Ask about services, office, jobs..." 
-            autocomplete="off"
-            aria-label="Type your message"
-          >
-          <button type="submit" class="operis-bot-send" aria-label="Send message">
-            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-          </button>
-        </form>
-      `;
-      document.body.appendChild(panel);
-
-      this.launcher = launcher;
-      this.panel = panel;
-      this.messagesContainer = document.getElementById('operisBotMessages');
-      this.input = document.getElementById('operisBotInput');
-      this.form = document.getElementById('operisBotForm');
-    }
-
-    bindEvents() {
-      this.launcher.addEventListener('click', () => this.toggle());
-      document.getElementById('operisBotClose').addEventListener('click', () => this.close());
-      document.getElementById('operisBotClear').addEventListener('click', () => this.clearChat());
-
-      this.form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const text = this.input.value.trim();
-        if (text) {
-          this.handleUserMessage(text);
-          this.input.value = '';
-        }
-      });
-
-      // Close on Escape
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && this.isOpen) {
-          this.close();
-        }
-      });
-    }
-
-    toggle() {
-      if (this.isOpen) {
-        this.close();
-      } else {
-        this.open();
-      }
-    }
-
-    open() {
-      this.isOpen = true;
-      this.panel.classList.add('active');
-      setTimeout(() => this.input.focus(), 200);
-    }
-
-    close() {
-      this.isOpen = false;
-      this.panel.classList.remove('active');
-    }
-
-    clearChat() {
-      this.messagesContainer.innerHTML = '';
-      this.addInitialGreeting();
-    }
-
-    addInitialGreeting() {
-      const greetingItem = KNOWLEDGE_RESPONSES.find(k => k.id === 'greeting');
-      this.appendBotMessage(greetingItem.response(), greetingItem.chips);
-    }
-
-    handleUserMessage(text) {
-      this.appendUserMessage(text);
-      this.showTypingIndicator();
-
-      // Realistic conversational delay
-      setTimeout(() => {
-        this.hideTypingIndicator();
-        this.respondTo(text);
-      }, 550);
-    }
-
-    respondTo(query) {
-      let matched = null;
-
-      for (const item of KNOWLEDGE_RESPONSES) {
-        if (item.patterns.some(regex => regex.test(query))) {
-          matched = item;
-          break;
-        }
-      }
-
-      if (matched) {
-        this.appendBotMessage(matched.response(), matched.chips);
-      } else {
-        this.appendBotMessage(getFallbackResponse(query), [
-          'What services do you offer?',
-          'Where is your office?',
-          'Contact numbers'
-        ]);
-      }
-    }
-
-    appendUserMessage(text) {
-      const msg = document.createElement('div');
-      msg.className = 'bot-msg user';
-      msg.innerHTML = `
-        <div class="bot-bubble">
-          ${this.escapeHTML(text)}
-        </div>
-      `;
-      this.messagesContainer.appendChild(msg);
-      this.scrollToBottom();
-    }
-
-    appendBotMessage(htmlContent, chips = []) {
-      const msg = document.createElement('div');
-      msg.className = 'bot-msg bot';
-
-      let chipsHTML = '';
-      if (chips && chips.length > 0) {
-        chipsHTML = `
-          <div class="bot-chips-wrap">
-            ${chips.map(chip => `<button type="button" class="bot-chip" onclick="window.operisBot.sendChip('${this.escapeQuotes(chip)}')">${chip}</button>`).join('')}
-          </div>
-        `;
-      }
-
-      msg.innerHTML = `
-        <div class="bot-msg-avatar">
-          <img src="${BOT_CONFIG.avatarImg}" alt="Bot">
-        </div>
-        <div class="bot-bubble">
-          ${htmlContent}
-          ${chipsHTML}
-        </div>
-      `;
-
-      this.messagesContainer.appendChild(msg);
-      this.scrollToBottom();
-    }
-
-    showTypingIndicator() {
-      if (this.isTyping) return;
-      this.isTyping = true;
-      const typing = document.createElement('div');
-      typing.id = 'botTyping';
-      typing.className = 'bot-msg bot';
-      typing.innerHTML = `
-        <div class="bot-msg-avatar">
-          <img src="${BOT_CONFIG.avatarImg}" alt="Bot">
-        </div>
-        <div class="bot-bubble bot-typing">
-          <span class="bot-typing-dot"></span>
-          <span class="bot-typing-dot"></span>
-          <span class="bot-typing-dot"></span>
-        </div>
-      `;
-      this.messagesContainer.appendChild(typing);
-      this.scrollToBottom();
-    }
-
-    hideTypingIndicator() {
-      const typing = document.getElementById('botTyping');
-      if (typing) typing.remove();
-      this.isTyping = false;
-    }
-
-    sendChip(text) {
-      this.handleUserMessage(text);
-    }
-
-    jumpTo(selector) {
-      const el = document.querySelector(selector);
-      if (el) {
-        this.close();
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-
-    scrollToBottom() {
-      this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-    }
-
-    escapeHTML(str) {
-      return str.replace(/[&<>'"]/g, tag => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        "'": '&#39;',
-        '"': '&quot;'
-      }[tag] || tag));
-    }
-
-    escapeQuotes(str) {
-      return str.replace(/'/g, "\\'");
-    }
+  .operis-bot-launcher .launcher-text {
+    display: none; /* Icon-only on mobile so it stays compact above WhatsApp */
   }
-
-  // Initialize on DOM ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      window.operisBot = new OperisBotWidget();
-    });
-  } else {
-    window.operisBot = new OperisBotWidget();
+  .operis-bot-panel {
+    bottom: 76px;
+    left: 14px;
+    right: 14px;
+    width: auto;
+    height: calc(100vh - 100px);
+    transform-origin: bottom right;
   }
-})();
+}
